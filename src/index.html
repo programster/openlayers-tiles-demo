@@ -95,20 +95,8 @@
 
             var tileSourceIndex = 1;
 
-            // http://leaflet-extras.github.io/leaflet-providers/preview/
-            var tileSources = [
+            //
 
-                // mtbmap
-                'http://tile.mtbmap.cz/mtbmap_tiles/{z}/{x}/{y}.png',
-
-
-                // transport map from opencyclemap
-                "http://tile2.opencyclemap.org/transport/{z}/{x}/{y}.png",
-
-                // CycleOSM
-                "https://{a-c}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png",
-
-            ];
 
 
             var providers = {
@@ -119,6 +107,11 @@
                             "name": "DeLorme",
                             "url": "https://server.arcgisonline.com/ArcGIS/rest/services/Specialty/DeLorme_World_Base_Map/MapServer/tile/{z}/{y}/{x}}",
                             "category" : "topographic"
+                        },
+                        "WorldGrayCanvas" : {
+                            "name": "WorldImagery",
+                            "url": "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}",
+                            "category" : "satellite"
                         },
                         "WorldImagery" : {
                             "name": "WorldImagery",
@@ -184,11 +177,30 @@
                     }
                 },
 
+                "MTB" : {
+                    "layers": {
+                        "OpenCycleMap": {
+                            "name": "Mtbmap",
+                            "url": "http://tile.mtbmap.cz/mtbmap_tiles/{z}/{x}/{y}.png"
+                        },
+                    }
+                },
+
+
+                "OpenCycleMap" : {
+                    "layers": {
+                        "OpenCycleMap": {
+                            "name": "OpenTopoMap",
+                            "url": "http://tile2.opencyclemap.org/transport/{z}/{x}/{y}.png"
+                        },
+                    }
+                },
+
                 "OSM": {
                     "layers": {
-                        "Mapnik" : {
-                            "name": "Basic",
-                            "url": "https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        "cycleosm" : {
+                            "name" : "CycleOSM",
+                            "url" : "https://{a-c}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png"
                         },
                         /* This appears to have stopped working.
                         "DE" : {
@@ -203,7 +215,11 @@
                         "HOT" : {
                             "name": "HOT",
                             "url": "https://{a-c}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png"
-                        }
+                        },
+                        "mapnik" : {
+                            "name": "Mapnik",
+                            "url": "https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        },
                     }
                 },
 
@@ -284,7 +300,15 @@
                 },
 
                 "Thunderforest" : {
+
+                    // Thunderforest wants API keys for all its maps.
+                    "apiKey" : true,
+
                     "layers" : {
+                        "Atlas" : {
+                            "name" : "Atlas",
+                            "url" : "https://tile.thunderforest.com/atlas/{z}/{x}/{y}.png",
+                        },
                         "CycleMap" : {
                             "name" : "Cycle Map",
                             "url" : "https://{a-c}.tile.thunderforest.com/cycle/{z}/{x}/{y}.png"
@@ -293,13 +317,34 @@
                             "name" : "Landscape",
                             "url" : "http://{a-c}.tile.thunderforest.com/landscape/{z}/{x}/{y}.png"
                         },
+                        "MobileAtlas" : {
+                            "name" : "Mobile Atlas",
+                            "url": "https://{a-c}.tile.thunderforest.com/mobile-atlas/{z}/{x}/{y}.png"
+                        },
+                        "Neighbourhood" : {
+                            "name" : "Mobile Atlas",
+                            "url": "https://{a-c}.tile.thunderforest.com/neighbourhood/{z}/{x}/{y}.png"
+                        },
                         "Outdoors" : {
                             "name" : "Outdoors",
                             "url" : "http://{a-c}.tile.thunderforest.com/outdoors/{z}/{x}/{y}.png"
                         },
+                        "Pioneer" : {
+                            "name" : "Pioneer",
+                            "url": "https://{a-c}.tile.thunderforest.com/pioneer/{z}/{x}/{y}.png"
+                        },
+                        "Spinal" : {
+                            "name" : "Spinal",
+                            "url" : "https://tile.thunderforest.com/spinal-map/{z}/{x}/{y}.png"
+                        },
                         "Transport" : {
                             "name" : "Transport",
                             "url": "https://{a-c}.tile.thunderforest.com/transport/{z}/{x}/{y}.png"
+                        },
+                        "TransportDark" : {
+                            "name" : "TransportDark",
+                            "url": "https://{a-c}.tile.thunderforest.com/transport-dark/{z}/{x}/{y}.png",
+                            "category" : "dark"
                         }
                     }
                 },
