@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en-gb">
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>Accessible Map</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.10.0/css/ol.css" type="text/css">
+    <script src="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.10.0/build/ol.js"></script>
+    <style>
+        html, body {
+            height:100%;
+            width: 100%;
+            margin: 0px;
+            padding: 0px;
+        }
+
+        #tile-selector {
+            position: absolute;
+            top: 1em;
+            right: 1em;
+            width: 20em;
+            height: 2em;
+            z-index: 1;
+        }
+
+
+        .map {
+            height: 100%;
+            width: 100%;
+        }
+
+        a.skiplink {
+            position: absolute;
+            clip: rect(1px, 1px, 1px, 1px);
+            padding: 0;
+            border: 0;
+            height: 1px;
+            width: 1px;
+            overflow: hidden;
+        }
+        a.skiplink:focus {
+            clip: auto;
+            height: auto;
+            width: auto;
+            background-color: #fff;
+            padding: 0.3em;
+        }
+        #map:focus {
+            outline: #4A74A8 solid 0.15em;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="filter-div">
+        <!-- Tile changer. -->
+        <select id="tile-selector"></select>
+
+    </div>
+
+
+    <!-- This is the div that holds the map -->
+    <div id="map" class="map" tabindex="0"></div>
+
+    <script>
+
+        (function() {
+            if (false)
+            {
+                // Mexico city.
+                var longitude = -99.1332; // degrees east (west is negative)
+                var latitude = 19.4326; // degrees north (south is negative)
+            }
+            else
+            {
+                // England.
+                var longitude = -2; // degrees east (west is negative)
+                var latitude = 52.5; // degrees north (south is negative)
+            }
+
+            var centerPoint = ol.proj.transform([longitude, latitude], 'EPSG:4326', 'EPSG:3857');
+
+            var mapControls = ol.control.defaults({
+                attributionOptions: ({
+                    collapsible: false
+                })
+            });
+
+            var mapView = new ol.View({
+                center: centerPoint,
+                zoom: 7
+            });
+
+
+            var tileSourceIndex = 1;
+
+            // http://leaflet-extras.github.io/leaflet-providers/preview/
+            var tileSources = [
+
+                // mtbmap
+                'http://tile.mtbmap.cz/mtbmap_tiles/{z}/{x}/{y}.png',
+
+
+                // transport map from opencyclemap
+                "http://tile2.opencyclemap.org/transport/{z}/{x}/{y}.png",
+
+                // CycleOSM
+                "https://{a-c}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png",
+
+            ];
+
+
+            var providers = {
+
+                "Esri": {
+                    "layers": {
+                        "DeLorme" : {
+                            "name": "DeLorme",
+                            "url": "https://server.arcgisonline.com/ArcGIS/rest/services/Specialty/DeLorme_World_Base_Map/MapServer/tile/{z}/{y}/{x}}",
+                            "category" : "topographic"
+                        },
+                        "WorldImagery" : {
+                            "name": "WorldImagery",
+                            "url": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+                            "category" : "satellite"
+                        },
+                        "WorldStreetMap" : {
+                            "name": "WorldStreetMap",
+                            "url": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
+                            "category" : "streetmap"
+                        },
+                        "WorldTopoMap" : {
+                            "name": "WorldTopoMap",
+                            "url": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
+                            "category" : "topographic"
+                        }
+                    }
+                },
+
+                "CartoDB": {
+                    "layers": {
+                        "Positron" : {
+                            "name": "Positron",
+                            "url": "https://{a-c}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
+                            "category" : "light"
+                        },
+                        "PositronNoLabels" : {
+                            "name": "PositronNoLabels",
+                            "url": "https://{a-c}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png",
+                            "category" : "light",
+                            "labels" : false
+                        },
+                        "DarkMatter" : {
+                            "name": "Dark Matter",
+                            "url": "http://{a-c}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
+                            "category" : "dark"
+                        },
+                        "DarkMatterNoLabels" : {
+                            "name": "Dark Matter - No Labels",
+                            "url": "https://{a-c}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png",
+                            "category" : "dark",
+                            "labels" : false
+                        },
+                        "Voyager" : {
+                            "name": "Voyager",
+                            "url": "https://{a-c}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png",
+                            "category" : "streetmap",
+                            "keywords" : ["light"]
+                        },
+                        "VoyagerNoLabels" : {
+                            "name": "VoyagerNoLabels",
+                            "url": "https://{a-c}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}.png",
+                            "category" : "streetmap",
+                            "keywords" : ["light"]
+                        },
+                        "VoyagerLabelsUnder" : {
+                            "name": "VoyagerNoLabels",
+                            "url": "https://{a-c}.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}.png",
+                            "category" : "streetmap",
+                            "keywords" : ["light"]
+                        },
+
+                    }
+                },
+
+                "OSM": {
+                    "layers": {
+                        "Mapnik" : {
+                            "name": "Basic",
+                            "url": "https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        },
+                        /* This appears to have stopped working.
+                        "DE" : {
+                            "name": "DE",
+                            "url": "https://{a-c}.tile.openstreetmap.de/tiles/osmde/{z}/{x}/{y}.png"
+                        },
+                        */
+                        "France" : {
+                            "name": "France",
+                            "url": "https://{a-c}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png"
+                        },
+                        "HOT" : {
+                            "name": "HOT",
+                            "url": "https://{a-c}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png"
+                        }
+                    }
+                },
+
+                /* This one appears to have stopped working.
+                "OPNVKarte": {
+                    "layers": {
+                        "OPNVKarte": {
+                            "name": "OPNVKarte",
+                            "url": "https://tileserver.memomaps.de/tilegen/{z}/{x}/{y}.png"
+                        },
+                    }
+                },
+                 */
+
+                "OpenTopoMap": {
+                    "layers": {
+                        "OpenTopoMap": {
+                            "name": "OpenTopoMap",
+                            "url": "https://{a-c}.tile.opentopomap.org/{z}/{x}/{y}.png"
+                        },
+                    }
+                },
+
+                "Stadia" : {
+                    "layers" : {
+                        "AlidadeSmooth" : {
+                            "name" : "AlidadeSmooth",
+                            "url": "https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}.png",
+                            "category" : "light"
+                        },
+                        "AlidadeSmoothDark" : {
+                            "name" : "AlidadeSmoothDark",
+                            "url": "https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png",
+                            "category" : "dark"
+                        },
+                        "OSMBright" : {
+                            "name" : "OSMBright",
+                            "url": "https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}.png"
+                        },
+                        "Outdoors" : {
+                            "name" : "Outdoors",
+                            "url": "https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}.png"
+                        }
+                    }
+                },
+
+                "Stamen" : {
+                    "layers" : {
+                        "Terrain" : {
+                            "name" : "Terrain",
+                            "url": "https://stamen-tiles-{a-c}.a.ssl.fastly.net/terrain/{z}/{x}/{y}.png"
+                        },
+                        "TerrainBackground" : {
+                            "name" : "TerrainBackground",
+                            "url" : "http://{a-c}.tile.stamen.com/terrain-background/{z}/{x}/{y}.png"
+                        },
+                        "Toner" : {
+                            "name" : "Toner",
+                            "url": "http://{a-c}.tile.stamen.com/toner/{z}/{x}/{y}.png",
+                            "category" : "high-contrast"
+                        },
+                        "TonerLite" : {
+                            "name" : "TonerLite",
+                            "url": "http://{a-c}.tile.stamen.com/toner-lite/{z}/{x}/{y}.png",
+                            "category" : "light"
+                        },
+                        "TonerBackground" : {
+                            "name" : "TonerBackground",
+                            "url": "http://{a-c}.tile.stamen.com/toner-background/{z}/{x}/{y}.png",
+                            "labels" : false
+                        },
+                        "WaterColor" : {
+                            "name" : "WaterColor",
+                            "url": "http://{a-c}.tile.stamen.com/watercolor/{z}/{x}/{y}.png",
+                            "labels" : false
+                        }
+                    }
+                },
+
+                "Thunderforest" : {
+                    "layers" : {
+                        "CycleMap" : {
+                            "name" : "Cycle Map",
+                            "url" : "https://{a-c}.tile.thunderforest.com/cycle/{z}/{x}/{y}.png"
+                        },
+                        "Landscape" : {
+                            "name" : "Landscape",
+                            "url" : "http://{a-c}.tile.thunderforest.com/landscape/{z}/{x}/{y}.png"
+                        },
+                        "Outdoors" : {
+                            "name" : "Outdoors",
+                            "url" : "http://{a-c}.tile.thunderforest.com/outdoors/{z}/{x}/{y}.png"
+                        },
+                        "Transport" : {
+                            "name" : "Transport",
+                            "url": "https://{a-c}.tile.thunderforest.com/transport/{z}/{x}/{y}.png"
+                        }
+                    }
+                },
+
+                "Wikimedia": {
+                    "layers": {
+                        "OSM-Intl" : {
+                            "name": "osm-intl",
+                            "url": "https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png"
+                        }
+                    }
+                },
+
+                "Misc" : {
+                    "layers": {
+                        "Klokantech3D": {
+                            "name": "Klokantech 3D",
+                            "url": "https://maps-cdn.salesboard.biz/styles/klokantech-3d-gl-style/{z}/{x}/{y}.png",
+                        }
+                    }
+                }
+            };
+
+            // You may also be interested in jawg maps, which require an api key:
+            // https://www.jawg.io/en/pricing
+
+            var tileLayer = new ol.layer.Tile({
+                source: new ol.source.OSM({
+                    "url": providers.CartoDB.layers.Positron.url
+                })
+            });
+
+            /*
+            var tileLayer = new ol.layer.Tile({
+                source: new ol.source.OSM()
+            });
+             */
+
+            var mapConfig = {
+                layers: [
+                    tileLayer
+                ],
+                target: 'map',
+                controls: mapControls,
+                view: mapView
+            };
+
+            var map = new ol.Map(mapConfig);
+
+            var dropdown = document.getElementById("tile-selector");
+
+            for (const providerName in providers)
+            {
+                var layers = providers[providerName].layers;
+
+                for (const layerIndex in layers)
+                {
+                    var layerObject = layers[layerIndex];
+                    var url = layerObject.url;
+                    //console.log(url);
+
+                    var humanReadableName = providerName + " - " + layerObject.name;
+                    var option = document.createElement("option");
+                    option.innerHTML = humanReadableName;
+                    option.value = layerObject.url;
+                    dropdown.appendChild(option);
+                }
+            }
+
+            dropdown.onchange = function(){
+                console.log("triggered change event.");
+                var url = dropdown.value;
+
+                var replacementTileLayer = new ol.layer.Tile({
+                    source: new ol.source.OSM({
+                        "url": url
+                    })
+                });
+
+                map.setLayers([replacementTileLayer]);
+            };
+
+
+            let changeEvent = new Event('change');
+            dropdown.dispatchEvent(changeEvent);
+
+            // if one wanted to manually control the map with buttons, here's an example of zooming in and out.
+            if (false)
+            {
+                document.getElementById('zoom-out').onclick = function() {
+                    var view = map.getView();
+                    var zoom = view.getZoom();
+                    view.setZoom(zoom - 1);
+                };
+
+                document.getElementById('zoom-in').onclick = function() {
+                    var view = map.getView();
+                    var zoom = view.getZoom();
+                    view.setZoom(zoom + 1);
+                };
+            }
+
+        })();
+
+    </script>
+</body>
+</html>
