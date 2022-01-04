@@ -9,5 +9,6 @@ Simply download the index.html file and open it in your browser. There is no
 need to compile/build anything. This is all just plain CSS and JS.
 
 ## Sources
-A good place to find these sources is from the 
-[Leaflet extras preview page](http://leaflet-extras.github.io/leaflet-providers/preview/).
+
+* [Leaflet extras preview page](http://leaflet-extras.github.io/leaflet-providers/preview/).
+* [wiki.openstreetmap.org](https://wiki.openstreetmap.org/wiki/Tile_servers)
